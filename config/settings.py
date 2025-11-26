@@ -9,15 +9,11 @@ GITHUB_TOKEN = os.environ.get("GH_TOKEN", "")
 GITHUB_PROTOCOL_TERMS = [
     "v2ray",
     "clash",
-    "clash meta",
     "vmess",
     "vless",
     "trojan",
     "ss",
     "ssr",
-    "hy2",
-    "hysteria2",
-    "hysteria",
 ]
 
 # GitHub搜索中使用的上下文相关术语
@@ -25,7 +21,6 @@ GITHUB_CONTEXT_TERMS = [
     "free",
     "subscribe",
     "nodes",
-    "config",
     "proxy",
     "proxies",
     "node list",
@@ -39,7 +34,7 @@ GITHUB_EXTRA_TERMS = [
 ]
 
 # GitHub搜索关键词的最大数量限制
-MAX_GITHUB_KEYWORDS = 60
+MAX_GITHUB_KEYWORDS = 6
 
 
 def _build_github_keywords():
