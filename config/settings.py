@@ -93,38 +93,32 @@ PLATFORM_PROTOCOL_TERMS = [
     "vless",
     "trojan",
     "hy2",
-    "hysteria2",
-    "hysteria",
-    "openvpn",
-    "wireguard",
     "clash",
-    "clashmeta",
     "ss",
-    "ssr",
 ]
 
-# 平台搜索中使用的上下文相关术语
+# 平台搜索中使用的上下文相关术语（精简为高价值项）
 PLATFORM_CONTEXT_TERMS = [
-    "nodes",
     "subscribe",
+    "free",
+    "nodes",
+    "config",
     "proxy",
     "proxies",
-    "free",
+    "node list",
+    "proxy list"
 ]
 
-# 平台搜索中使用的独立术语
+# 平台搜索中使用的独立术语（精简版）
 PLATFORM_SINGLE_TERMS = [
-    "socks",
-    "socks5",
-    "socks4",
-    "tunnel",
-    "anytls",
     "shadowsocks",
-    "shadowsockrocks",
+    "wireguard",
 ]
 
 # 平台搜索关键词的最大数量限制
-MAX_PLATFORM_KEYWORDS = 60
+# 可通过环境变量 MAX_PLATFORM_KW 覆盖，GitHub Action 建议设为 15-25
+_DEFAULT_MAX_PLATFORM_KEYWORDS = 25
+MAX_PLATFORM_KEYWORDS = int(os.environ.get("MAX_PLATFORM_KW", _DEFAULT_MAX_PLATFORM_KEYWORDS))
 
 
 def _build_platform_keywords():
