@@ -1,10 +1,9 @@
 __pycache__/
 *.pyc
 *.pyo
-*.db
 .env
-data/*.db
-data/*.txt
+
+
 .venv/
 *.log
 .DS_Store
@@ -13,6 +12,6 @@ data/*.txt
 *.pdf
 .claude
 .python-version
-todo
+todo/
 CLAUDE.md
 SNOW.md

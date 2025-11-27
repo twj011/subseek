@@ -73,7 +73,7 @@ class DDGSearcher:
         """
         try:
             # 导入DuckDuckGo搜索库
-            from duckduckgo_search import DDGS
+            from ddgs import DDGS
             # 初始化结果列表
             results = []
             # 创建DDGS上下文管理器

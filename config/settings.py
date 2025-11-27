@@ -1,48 +1,20 @@
 import os
-from itertools import product, islice, combinations
+from itertools import product
 
 # GitHub settings
 # GitHub访问令牌，从环境变量GH_TOKEN获取，默认为空字符串
 GITHUB_TOKEN = os.environ.get("GH_TOKEN", "")
 
-# GitHub搜索中使用的协议相关术语
-GITHUB_PROTOCOL_TERMS = [
-    "v2ray",
-    "clash",
-    "vmess",
-    "vless",
-    "trojan",
-    "ss",
-    "ssr",
-]
-
-# GitHub搜索中使用的基础标志词
-GITHUB_BASE_FLAGS = [
-    "free",
-]
-
-# GitHub搜索中使用的节点相关术语
-GITHUB_NODE_TERMS = [
-    "node",
-    "nodes",
-    "proxy",
-    "proxies",
-]
-
-# GitHub搜索中使用的元信息术语
-GITHUB_META_TERMS = [
-    "subscribe",
-]
-
-# GitHub搜索中使用的上下文相关术语
-GITHUB_CONTEXT_TERMS = GITHUB_NODE_TERMS + GITHUB_META_TERMS
-
 # GitHub搜索中使用的额外术语（中文短语等）
 GITHUB_EXTRA_TERMS = [
+    "free v2ray",
+    "free vmess",
+    "free vless",
+    "free trojan",
+    "free proxy",
+    "free node",
     "免费节点",
-    "翻墙节点",
     "免费代理",
-    "每日更新",
 ]
 
 # GitHub搜索关键词的最大数量限制
@@ -54,8 +26,8 @@ def _build_github_keywords():
     """
     构建GitHub搜索关键词列表
     
-    通过组合协议术语和上下文术语生成搜索关键词，避免重复并限制总数。
-    同时添加额外的预定义关键词。
+    完全由用户在 GITHUB_EXTRA_TERMS 中自定义搜索关键词，
+    按顺序去重并裁剪到 MAX_GITHUB_KEYWORDS 个。
     
     Returns:
         list: 包含生成的关键词字符串列表，长度不超过MAX_GITHUB_KEYWORDS
@@ -63,47 +35,14 @@ def _build_github_keywords():
     keywords = []
     seen = set()
 
-    def add_keyword(kw):
+    for kw in GITHUB_EXTRA_TERMS:
+        if len(keywords) >= MAX_GITHUB_KEYWORDS:
+            break
         if kw and kw not in seen:
             keywords.append(kw)
             seen.add(kw)
 
-    # 1. 先添加额外术语（中文短语等）
-    for kw in GITHUB_EXTRA_TERMS:
-        if len(keywords) >= MAX_GITHUB_KEYWORDS:
-            return keywords[:MAX_GITHUB_KEYWORDS]
-        add_keyword(kw)
-
-    if len(keywords) >= MAX_GITHUB_KEYWORDS:
-        return keywords[:MAX_GITHUB_KEYWORDS]
-
-    # 2. 生成两词组合：free + 协议 / 节点词
-    for flag in GITHUB_BASE_FLAGS:
-        for proto in GITHUB_PROTOCOL_TERMS:
-            if len(keywords) >= MAX_GITHUB_KEYWORDS:
-                return keywords[:MAX_GITHUB_KEYWORDS]
-            add_keyword(f"{flag} {proto}")
-        for node in GITHUB_NODE_TERMS:
-            if len(keywords) >= MAX_GITHUB_KEYWORDS:
-                return keywords[:MAX_GITHUB_KEYWORDS]
-            add_keyword(f"{flag} {node}")
-
-    if len(keywords) >= MAX_GITHUB_KEYWORDS:
-        return keywords[:MAX_GITHUB_KEYWORDS]
-
-    # 3. 生成三词组合：free + 协议 + 节点 / 元信息
-    for flag in GITHUB_BASE_FLAGS:
-        for proto in GITHUB_PROTOCOL_TERMS:
-            for node in GITHUB_NODE_TERMS:
-                if len(keywords) >= MAX_GITHUB_KEYWORDS:
-                    return keywords[:MAX_GITHUB_KEYWORDS]
-                add_keyword(f"{flag} {proto} {node}")
-            for meta in GITHUB_META_TERMS:
-                if len(keywords) >= MAX_GITHUB_KEYWORDS:
-                    return keywords[:MAX_GITHUB_KEYWORDS]
-                add_keyword(f"{flag} {proto} {meta}")
-
-    return keywords[:MAX_GITHUB_KEYWORDS]
+    return keywords
 
 
 GITHUB_KEYWORDS = _build_github_keywords()

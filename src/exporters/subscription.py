@@ -1,12 +1,40 @@
 import base64
 import os
+from datetime import datetime
 from src.database.models import Session, ProxyNode
 from config.settings import EXPORT_PATH, EXPORT_BASE64_PATH
 
+
+def _write_nodes_to_file(nodes, path):
+    """Write given nodes' links to a text file, one per line."""
+    if not path:
+        return
+    directory = os.path.dirname(path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        for node in nodes:
+            if node.link:
+                f.write(node.link.strip() + "\n")
+
+
 def export_subscription(output_path=None, base64_output_path=None, limit=None):
-    """Export collected nodes to subscription files"""
+    """Export collected nodes to subscription files.
+
+    Behavior:
+    - Always export a combined file (all nodes) to EXPORT_PATH (or output_path argument).
+    - Additionally, create date-based copies under data/YYYY/MM/DD/ using the same
+      base filename.
+    - Split nodes by source into two extra files:
+        * sub_github.txt   (nodes whose source is not from platform search)
+        * sub_platform.txt (nodes whose source starts with "platform:")
+      Each of these also has a date-based copy under the same date directory.
+    - Base64 export still uses EXPORT_BASE64_PATH (or base64_output_path)
+      for the latest combined file.
+    """
     output_path = output_path or EXPORT_PATH
     base64_output_path = base64_output_path or EXPORT_BASE64_PATH
+
     session = Session()
     try:
         query = session.query(ProxyNode).order_by(ProxyNode.created_at.desc())
@@ -15,22 +43,64 @@ def export_subscription(output_path=None, base64_output_path=None, limit=None):
         else:
             nodes = query.all()
 
-        if output_path:
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            with open(output_path, "w", encoding="utf-8") as f:
-                for node in nodes:
-                    if node.link:
-                        f.write(node.link.strip() + "\n")
+        # Classify nodes by source: platform vs GitHub (or other)
+        platform_nodes = []
+        github_nodes = []
+        for node in nodes:
+            src = node.source or ""
+            if src.startswith("platform:"):
+                platform_nodes.append(node)
+            else:
+                github_nodes.append(node)
 
+        # Build date-based directory under the same root as output_path
+        now = datetime.now()
+        root_dir = os.path.dirname(output_path) or "."
+        date_dir = os.path.join(
+            root_dir,
+            f"{now.year:04d}",
+            f"{now.month:02d}",
+            f"{now.day:02d}",
+        )
+
+        base_name = os.path.basename(output_path)
+        dated_combined_path = os.path.join(date_dir, base_name)
+
+        # Export combined (all) nodes: latest + dated
+        _write_nodes_to_file(nodes, output_path)
+        _write_nodes_to_file(nodes, dated_combined_path)
+
+        # Export GitHub-only nodes
+        github_filename = "sub_github.txt"
+        latest_github_path = os.path.join(root_dir, github_filename)
+        dated_github_path = os.path.join(date_dir, github_filename)
+        _write_nodes_to_file(github_nodes, latest_github_path)
+        _write_nodes_to_file(github_nodes, dated_github_path)
+
+        # Export platform-only nodes
+        platform_filename = "sub_platform.txt"
+        latest_platform_path = os.path.join(root_dir, platform_filename)
+        dated_platform_path = os.path.join(date_dir, platform_filename)
+        _write_nodes_to_file(platform_nodes, latest_platform_path)
+        _write_nodes_to_file(platform_nodes, dated_platform_path)
+
+        # Base64 export for the combined latest file
         if base64_output_path and output_path:
             with open(output_path, "rb") as f:
                 content = f.read()
             b64 = base64.b64encode(content).decode("utf-8")
-            os.makedirs(os.path.dirname(base64_output_path), exist_ok=True)
+            base64_dir = os.path.dirname(base64_output_path)
+            if base64_dir:
+                os.makedirs(base64_dir, exist_ok=True)
             with open(base64_output_path, "w", encoding="utf-8") as f:
                 f.write(b64)
 
-        print(f"Exported {len(nodes)} nodes to {output_path}")
+        print(
+            f"Exported {len(nodes)} nodes: "
+            f"combined -> {output_path}, "
+            f"GitHub -> {latest_github_path}, "
+            f"platform -> {latest_platform_path}"
+        )
     except Exception as e:
         print(f"Error exporting subscription: {e}")
     finally:

@@ -7,5 +7,6 @@ requires-python = ">=3.11"
 dependencies = [
     "requests",
     "sqlalchemy",
-    "pyyaml"
+    "pyyaml",
+    "ddgs"
 ]
