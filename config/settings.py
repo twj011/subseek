@@ -9,38 +9,45 @@ GITHUB_TOKEN = os.environ.get("GH_TOKEN", "")
 GITHUB_PROTOCOL_TERMS = [
     "v2ray",
     "clash",
-<<<<<<< HEAD
-=======
     "vmess",
     "vless",
     "trojan",
     "ss",
     "ssr",
->>>>>>> 3eb4acf7275e6e8f4e8ca98412db802b01e0bf38
+]
+
+# GitHub搜索中使用的基础标志词
+GITHUB_BASE_FLAGS = [
+    "free",
+]
+
+# GitHub搜索中使用的节点相关术语
+GITHUB_NODE_TERMS = [
+    "node",
+    "nodes",
+    "proxy",
+    "proxies",
+]
+
+# GitHub搜索中使用的元信息术语
+GITHUB_META_TERMS = [
+    "subscribe",
 ]
 
 # GitHub搜索中使用的上下文相关术语
-GITHUB_CONTEXT_TERMS = [
-    "free",
-<<<<<<< HEAD
-    "node",
-=======
-    "subscribe",
-    "nodes",
->>>>>>> 3eb4acf7275e6e8f4e8ca98412db802b01e0bf38
-    "proxy",
+GITHUB_CONTEXT_TERMS = GITHUB_NODE_TERMS + GITHUB_META_TERMS
+
+# GitHub搜索中使用的额外术语（中文短语等）
+GITHUB_EXTRA_TERMS = [
+    "免费节点",
+    "翻墙节点",
+    "免费代理",
+    "每日更新",
 ]
 
-# GitHub搜索中使用的额外术语
-GITHUB_EXTRA_TERMS = []
-
 # GitHub搜索关键词的最大数量限制
-<<<<<<< HEAD
-_DEFAULT_MAX_GITHUB_KEYWORDS = 60
+_DEFAULT_MAX_GITHUB_KEYWORDS = 6
 MAX_GITHUB_KEYWORDS = int(os.environ.get("MAX_GITHUB_KW", _DEFAULT_MAX_GITHUB_KEYWORDS))
-=======
-MAX_GITHUB_KEYWORDS = 6
->>>>>>> 3eb4acf7275e6e8f4e8ca98412db802b01e0bf38
 
 
 def _build_github_keywords():
@@ -53,35 +60,50 @@ def _build_github_keywords():
     Returns:
         list: 包含生成的关键词字符串列表，长度不超过MAX_GITHUB_KEYWORDS
     """
+    keywords = []
     seen = set()
-    
-    # 使用 product 生成所有可能的两两组合
-    all_terms = GITHUB_PROTOCOL_TERMS + GITHUB_CONTEXT_TERMS
-    unique_keywords = []
 
-    for term in all_terms:
-        if term not in seen:
-            unique_keywords.append(term)
-            seen.add(term)
-
-    # 使用 combinations 避免对称组合 (t1, t2) 和 (t2, t1)
-    # 这能让我们在有限的关键词数量内探索更多样化的组合
-    keyword_iterator = (f"{t1} {t2}" for t1, t2 in combinations(all_terms, 2))
-
-    # 过滤掉已经见过的关键词
-    for kw in keyword_iterator:
-        if kw not in seen:
-            unique_keywords.append(kw)
+    def add_keyword(kw):
+        if kw and kw not in seen:
+            keywords.append(kw)
             seen.add(kw)
 
-    # 添加额外的术语
+    # 1. 先添加额外术语（中文短语等）
     for kw in GITHUB_EXTRA_TERMS:
-        if kw not in seen:
-            unique_keywords.append(kw)
-            seen.add(kw)
-            
-    # 限制关键词总数
-    return unique_keywords[:MAX_GITHUB_KEYWORDS]
+        if len(keywords) >= MAX_GITHUB_KEYWORDS:
+            return keywords[:MAX_GITHUB_KEYWORDS]
+        add_keyword(kw)
+
+    if len(keywords) >= MAX_GITHUB_KEYWORDS:
+        return keywords[:MAX_GITHUB_KEYWORDS]
+
+    # 2. 生成两词组合：free + 协议 / 节点词
+    for flag in GITHUB_BASE_FLAGS:
+        for proto in GITHUB_PROTOCOL_TERMS:
+            if len(keywords) >= MAX_GITHUB_KEYWORDS:
+                return keywords[:MAX_GITHUB_KEYWORDS]
+            add_keyword(f"{flag} {proto}")
+        for node in GITHUB_NODE_TERMS:
+            if len(keywords) >= MAX_GITHUB_KEYWORDS:
+                return keywords[:MAX_GITHUB_KEYWORDS]
+            add_keyword(f"{flag} {node}")
+
+    if len(keywords) >= MAX_GITHUB_KEYWORDS:
+        return keywords[:MAX_GITHUB_KEYWORDS]
+
+    # 3. 生成三词组合：free + 协议 + 节点 / 元信息
+    for flag in GITHUB_BASE_FLAGS:
+        for proto in GITHUB_PROTOCOL_TERMS:
+            for node in GITHUB_NODE_TERMS:
+                if len(keywords) >= MAX_GITHUB_KEYWORDS:
+                    return keywords[:MAX_GITHUB_KEYWORDS]
+                add_keyword(f"{flag} {proto} {node}")
+            for meta in GITHUB_META_TERMS:
+                if len(keywords) >= MAX_GITHUB_KEYWORDS:
+                    return keywords[:MAX_GITHUB_KEYWORDS]
+                add_keyword(f"{flag} {proto} {meta}")
+
+    return keywords[:MAX_GITHUB_KEYWORDS]
 
 
 GITHUB_KEYWORDS = _build_github_keywords()
