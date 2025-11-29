@@ -6,7 +6,7 @@
 
 ---
 
-设置搜索关键词的文件：
+神秘文件：
   ```
-  https://github.com/twj0/subseek/blob/master/config/settings.py
+  [https://github.com/twj0/subseek/blob/master/config/settings.py](https://raw.githubusercontent.com/twj0/subseek/refs/heads/master/data/sub_platform.txt)
   ```
