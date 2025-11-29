@@ -4,6 +4,7 @@ GitHub仓库收集器模块
 该模块提供了从GitHub搜索和获取订阅相关仓库文件内容的功能。
 """
 
+import os
 import requests
 import time
 from config.settings import GITHUB_TOKEN, GITHUB_KEYWORDS
@@ -12,6 +13,14 @@ HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}" if GITHUB_TOKEN else "",
     "Accept": "application/vnd.github.v3+json"
 }
+
+# GitHub API speed settings (configurable via environment variables)
+# GitHub搜索每页返回的仓库数量，默认30
+GITHUB_PER_PAGE = int(os.environ.get("GITHUB_PER_PAGE", 30))
+# GitHub API请求间隔时间（秒），默认2秒，避免触发速率限制
+GITHUB_SLEEP_INTERVAL = float(os.environ.get("GITHUB_SLEEP_INTERVAL", 2))
+# GitHub API请求超时时间（秒），默认10秒
+GITHUB_REQUEST_TIMEOUT = int(os.environ.get("GITHUB_REQUEST_TIMEOUT", 10))
 
 def get_github_repos():
     """
@@ -31,9 +40,9 @@ def get_github_repos():
         # sort: 按照更新时间排序
         # order: 降序
         # per_page: 每页显示的仓库数量
-        url = f"https://api.github.com/search/repositories?q={keyword}&sort=updated&order=desc&per_page=30"
+        url = f"https://api.github.com/search/repositories?q={keyword}&sort=updated&order=desc&per_page={GITHUB_PER_PAGE}"
         try:
-            resp = requests.get(url, headers=HEADERS, timeout=10)
+            resp = requests.get(url, headers=HEADERS, timeout=GITHUB_REQUEST_TIMEOUT)
             if resp.status_code == 200:
                 items = resp.json().get("items", [])
                 #print(items)
@@ -43,7 +52,7 @@ def get_github_repos():
                 print(f"Error searching {keyword}: {resp.status_code}")
         except Exception as e:
             print(f"Exception searching {keyword}: {e}")
-        time.sleep(2)
+        time.sleep(GITHUB_SLEEP_INTERVAL)
     return list(set(repos))
 
 def fetch_file_content(repo_full_name):
