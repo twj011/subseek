@@ -5,13 +5,20 @@ services:
     image: ghcr.io/${IMAGE_OWNER:-twj0}/subseek:latest
     container_name: subseek
     environment:
+      # API Keys
       - GH_TOKEN=${GH_TOKEN}
       - HUNTER_API_KEY=${HUNTER_API_KEY}
       - QUAKE_API_KEY=${QUAKE_API_KEY}
+      # GitHub Speed Settings
+      - GITHUB_SEARCH_TERMS=${GITHUB_SEARCH_TERMS:-free v2ray,free proxy}
       - MAX_GITHUB_KW=${MAX_GITHUB_KW:-2}
       - GITHUB_PER_PAGE=${GITHUB_PER_PAGE:-30}
       - GITHUB_SLEEP_INTERVAL=${GITHUB_SLEEP_INTERVAL:-2}
       - GITHUB_REQUEST_TIMEOUT=${GITHUB_REQUEST_TIMEOUT:-10}
+      # Run Control
+      - RUN_GITHUB=${RUN_GITHUB:-1}
+      - RUN_PLATFORMS=${RUN_PLATFORMS:-1}
+      - MAX_WORKERS=${MAX_WORKERS:-8}
 
     volumes:
       - ./data:/app/data
