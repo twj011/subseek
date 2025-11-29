@@ -11,7 +11,7 @@ __pycache__/
 *.ipynb
 *.pdf
 .claude
-.python-version
+
 todo/
 CLAUDE.md
 SNOW.md

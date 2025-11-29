@@ -1,13 +1,12 @@
 [project]
 name = "subseek"
 version = "0.1.0"
-description = "Add your description here"
+description = "搜索GitHub仓库公开的节点和网络公开的节点"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "requests",
     "sqlalchemy",
     "pyyaml",
     "ddgs",
-    "openai>=2.8.1",
 ]

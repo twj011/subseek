@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   subseek:
-    build: .
+    image: ghcr.io/${IMAGE_OWNER}/subseek:latest
     container_name: subseek
     environment:
       - GH_TOKEN=${GH_TOKEN}
