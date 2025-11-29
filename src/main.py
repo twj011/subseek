@@ -4,8 +4,10 @@
 """
 
 import os
+import time
 import requests
 import hashlib
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from src.database.models import Session, ProxyNode
 from src.collectors.github import get_github_repos, fetch_file_content
 from src.collectors.platforms import search_all_platforms
@@ -104,38 +106,86 @@ def main():
     run_github = os.environ.get("RUN_GITHUB", "1") == "1"
     run_platforms = os.environ.get("RUN_PLATFORMS", "1") == "1"
 
+    total_start = time.perf_counter()  # 记录总开始时间
+
     print("Start collecting...")  # 开始收集的提示信息
 
+    github_start = time.perf_counter()  # 记录GitHub处理阶段开始时间
     # GitHub仓库处理流程
     if run_github:
         repos = get_github_repos()  # 获取GitHub仓库列表
         print(f"Found {len(repos)} repositories.")  # 打印找到的仓库数量
-        for repo in repos:  # 遍历每个仓库
-            print(f"Processing {repo}...")  # 处理当前仓库的提示信息
-            contents = fetch_file_content(repo)  # 获取仓库中的文件内容
-            for content in contents:  # 遍历每个文件内容
-                links = parse_content(content)  # 解析内容中的链接
-                if links:  # 如果找到链接
-                    save_nodes(links, repo)  # 保存链接和对应的仓库信息
+
+        max_workers = int(os.environ.get("MAX_WORKERS", "8")) or 1  # 设置线程池最大工作线程数
+
+        def handle_repo(repo):
+            """处理单个仓库的函数"""
+            print(f"Processing {repo}...")
+            contents = fetch_file_content(repo)  # 获取仓库文件内容
+            repo_links = []
+            for content in contents:
+                links = parse_content(content)  # 解析文件内容中的链接
+                if links:
+                    repo_links.extend(links)  # 收集所有链接
+            return repo, repo_links
+
+        github_results = []  # 存储GitHub处理结果
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:  # 创建线程池执行器
+            futures = [executor.submit(handle_repo, repo) for repo in repos]  # 提交所有仓库处理任务
+            for future in as_completed(futures):  # 等待所有任务完成
+                repo, repo_links = future.result()
+                if repo_links:
+                    github_results.append((repo, repo_links))  # 保存有链接的结果
+
+        for repo, repo_links in github_results:
+            save_nodes(repo_links, repo)  # 保存链接和对应的仓库信息
     else:
         print("Skipping GitHub repository collection.")  # 跳过GitHub仓库收集的提示信息
+    github_end = time.perf_counter()  # 记录GitHub处理阶段结束时间
+    print(f"GitHub phase took {github_end - github_start:.2f} seconds.")  # 打印GitHub处理阶段耗时
 
+    platform_start = time.perf_counter()  # 记录平台搜索阶段开始时间
     # 网络映射平台搜索流程
     if run_platforms:
         print("\nSearching network mapping platforms...")  # 搜索网络映射平台的提示信息
         urls = search_all_platforms(PLATFORM_KEYWORDS)  # 在所有平台上搜索URL
         print(f"Found {len(urls)} URLs from platforms.")  # 打印从平台找到的URL数量
-        for url in urls:  # 遍历每个URL
-            print(f"Fetching {url}...")  # 获取URL内容的提示信息
-            content = fetch_url_content(url)  # 获取URL的内容
-            if content:  # 如果内容存在
-                links = parse_content(content)  # 解析内容中的链接
-                if links:  # 如果找到链接
-                    save_nodes(links, f"platform:{url}")  # 保存链接和对应的平台URL信息
+
+        max_workers = int(os.environ.get("MAX_WORKERS", "8")) or 1  # 设置线程池最大工作线程数
+
+        def handle_url(url):
+            """处理单个URL的函数"""
+            print(f"Fetching {url}...")
+            content = fetch_url_content(url)  # 获取URL内容
+            if not content:
+                return url, []
+            links = parse_content(content)  # 解析内容中的链接
+            if not links:
+                return url, []
+            return url, links
+
+        platform_results = []  # 存储平台搜索结果
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:  # 创建线程池执行器
+            futures = [executor.submit(handle_url, url) for url in urls]  # 提交所有URL处理任务
+            for future in as_completed(futures):  # 等待所有任务完成
+                url, links = future.result()
+                if links:
+                    platform_results.append((url, links))  # 保存有链接的结果
+
+        for url, links in platform_results:
+            save_nodes(links, f"platform:{url}")  # 保存链接和对应的平台URL信息
     else:
         print("Skipping network mapping platforms.")  # 跳过网络映射平台搜索的提示信息
+    platform_end = time.perf_counter()  # 记录平台搜索阶段结束时间
+    print(f"Platform phase took {platform_end - platform_start:.2f} seconds.")  # 打印平台搜索阶段耗时
 
+    export_start = time.perf_counter()  # 记录导出阶段开始时间
     export_subscription()  # 导出最终的订阅列表
+    export_end = time.perf_counter()  # 记录导出阶段结束时间
+    print(f"Export phase took {export_end - export_start:.2f} seconds.")  # 打印导出阶段耗时
+
+    total_end = time.perf_counter()  # 记录总结束时间
+    print(f"Total elapsed time: {total_end - total_start:.2f} seconds.")  # 打印总耗时
     print("Done.")  # 完成处理的提示信息
 
 if __name__ == "__main__":
