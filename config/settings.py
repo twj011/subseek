@@ -10,17 +10,14 @@ GITHUB_TOKEN = os.environ.get("GH_TOKEN", "")
 # GitHub搜索中使用的完全由用户自定义的术语
 GITHUB_SEARCH_TERMS = [
     "free v2ray",
-    "free vmess",
-    "free vless",
-    "free trojan",
     "free proxy",
     "free node",
-    "免费节点",
-    "免费代理",
+    "免费 节点",
+    "免费 代理",
 ]
 
 # GitHub搜索关键词的最大数量限制，如果你想快点搜索的话可以调小这个值
-_DEFAULT_MAX_GITHUB_KEYWORDS = 3
+_DEFAULT_MAX_GITHUB_KEYWORDS = 1
 MAX_GITHUB_KEYWORDS = int(os.environ.get("MAX_GITHUB_KW", _DEFAULT_MAX_GITHUB_KEYWORDS))
 
 
