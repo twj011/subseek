@@ -1,3 +1,14 @@
+*神秘地址*
+```
+https://raw.githubusercontent.com/twj0/subseek/refs/heads/master/data/sub_github.txt
+```
+
+```
+https://raw.githubusercontent.com/twj0/subseek/refs/heads/master/data/sub_platform.txt
+```
+
+---
+
 # SubSeek 
 
 一个用于自动从 GitHub 免费节点仓库和网络映射平台中收集代理节点，并导出为订阅文件的轻量级工具。
