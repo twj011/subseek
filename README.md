@@ -131,7 +131,7 @@ python -m src.main
 
 ### GitHub搜索原理
 
-1. **关键词构建**：系统使用预定义的协议术语（如"v2ray"、"trojan"）和上下文术语（如"free"、"subscribe"）组合成搜索关键词
+1. **关键词构建**：系统使用预定义的协议术语搜索关键词("free v2ray,free proxy")
 2. **API搜索**：通过GitHub API搜索仓库，按更新时间排序获取最新结果
 3. **文件筛选**：在仓库中查找常见的订阅文件名（如"v2ray.txt"、"clash.yaml"）或包含关键词的文件
 4. **内容获取**：获取筛选出的文件内容，准备进行解析
@@ -165,7 +165,9 @@ python -m src.main
 - `data/sub_base64.txt`：Base64编码的订阅文件
 - `data/sub_github.txt`：仅来自GitHub的节点
 - `data/sub_platform.txt`：仅来自平台搜索的节点
-- `data/YYYY/MM/DD/`：按日期归档的历史订阅文件
+- `data/github/YYYY/MM/DD/sub_github.txt`：GitHub来源的按日归档节点，便于追溯不同日期的抓取结果
+- `data/platform/YYYY/MM/DD/sub_platform.txt`：平台来源的按日归档节点，与GitHub归档结构一致
+- `data/YYYY/MM/DD/`：按日期归档的历史订阅文件（所有来源的聚合导出的向后兼容位置）
 
 ## 自定义搜索关键词
 

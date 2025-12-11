@@ -50,6 +50,9 @@ def export_subscription(output_path=None, base64_output_path=None, limit=None):
         * sub_github.txt   (nodes whose source is not from platform search)
         * sub_platform.txt (nodes whose source starts with "platform:")
       Each of these also has a date-based copy under the same date directory.
+      Additionally, the GitHub/platform exports are archived under
+      data/github/YYYY/MM/DD/ and data/platform/YYYY/MM/DD/ to provide
+      timestamp-scoped history per source.
     - Base64 export still uses EXPORT_BASE64_PATH (or base64_output_path)
       for the latest combined file.
       
@@ -86,12 +89,16 @@ def export_subscription(output_path=None, base64_output_path=None, limit=None):
         # Build date-based directory under the same root as output_path
         now = datetime.now()
         root_dir = os.path.dirname(output_path) or "."
-        date_dir = os.path.join(
-            root_dir,
+        date_parts = (
             f"{now.year:04d}",
             f"{now.month:02d}",
             f"{now.day:02d}",
         )
+        date_dir = os.path.join(root_dir, *date_parts)
+        github_root = os.path.join(root_dir, "github")
+        platform_root = os.path.join(root_dir, "platform")
+        github_date_dir = os.path.join(github_root, *date_parts)
+        platform_date_dir = os.path.join(platform_root, *date_parts)
 
         base_name = os.path.basename(output_path)
         dated_combined_path = os.path.join(date_dir, base_name)
@@ -104,15 +111,19 @@ def export_subscription(output_path=None, base64_output_path=None, limit=None):
         github_filename = "sub_github.txt"
         latest_github_path = os.path.join(root_dir, github_filename)
         dated_github_path = os.path.join(date_dir, github_filename)
+        structured_github_path = os.path.join(github_date_dir, github_filename)
         _write_nodes_to_file(github_nodes, latest_github_path)
         _write_nodes_to_file(github_nodes, dated_github_path)
+        _write_nodes_to_file(github_nodes, structured_github_path)
 
         # Export platform-only nodes
         platform_filename = "sub_platform.txt"
         latest_platform_path = os.path.join(root_dir, platform_filename)
         dated_platform_path = os.path.join(date_dir, platform_filename)
+        structured_platform_path = os.path.join(platform_date_dir, platform_filename)
         _write_nodes_to_file(platform_nodes, latest_platform_path)
         _write_nodes_to_file(platform_nodes, dated_platform_path)
+        _write_nodes_to_file(platform_nodes, structured_platform_path)
 
         # Base64 export for the combined latest file
         if base64_output_path and output_path:
