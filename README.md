@@ -180,21 +180,6 @@ python -m src.main
 - `data/platform/YYYY/MM/DD/sub_platform.txt`：平台来源的按日归档节点，与GitHub归档结构一致
 - `data/YYYY/MM/DD/`：按日期归档的历史订阅文件（所有来源的聚合导出的向后兼容位置）
 
-## 自定义搜索关键词
-
-搜索关键词配置位于 `config/settings.py` 文件中：
-
-1. **GitHub搜索关键词**：
-   ```python
-   _DEFAULT_GITHUB_SEARCH_TERMS = ["free v2ray", "free proxy"]
-   ```
-
-2. **平台搜索关键词**：
-   - 协议术语：`["v2ray", "vmess", "vless", "trojan", "hy2", "clash", "ss"]`
-   - 上下文术语：`["subscribe", "free", "nodes", "config", "proxy"]`
-   - 独立术语：`["shadowsocks", "wireguard"]`
-
-系统会自动组合这些术语生成完整的搜索关键词列表。
 
 ## 常见问题
 
