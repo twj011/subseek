@@ -66,6 +66,25 @@ SubSeek 的工作流程分为以下几个主要步骤：
 
 ### 使用Docker（本地运行）
 
+#### 使用预构建镜像（推荐）
+
+项目在GitHub上自动构建Docker镜像，可直接拉取使用：
+
+```bash
+# 拉取最新镜像
+docker pull ghcr.io/twj0/subseek:latest
+
+# 运行容器（需要配置环境变量）
+docker run --rm \
+  -e GH_TOKEN="your_github_token" \
+  -e HUNTER_API_KEY="your_hunter_key" \
+  -e QUAKE_API_KEY="your_quake_key" \
+  -v $(pwd)/data:/app/data \
+  ghcr.io/twj0/subseek:latest
+```
+
+#### 本地构建运行
+
 1. 复制环境变量配置文件：
 ```bash
 cp .env.example .env
@@ -80,6 +99,8 @@ nano .env
 ```bash
 docker-compose up -d
 ```
+
+**注意**：Docker镜像在每次代码推送时自动构建并发布到GitHub Container Registry (ghcr.io)。
 
 ### 本地运行
 
@@ -106,21 +127,19 @@ python -m src.main
 
 | 变量名 | 必需 | 默认值 | 说明 |
 |--------|------|--------|------|
-| `GH_TOKEN` | 推荐 | 无 | GitHub个人访问令牌，用于提高API请求限制 |
+| `GH_TOKEN` | 推荐 | 无 | GitHub个人访问令牌，用于提高API请求限制（强烈推荐配置） |
 | `GH_SEARCH_TERMS` | 否 | "free v2ray,free proxy" | GitHub搜索关键词，多个用逗号分隔 |
 | `MAX_GH_KW` | 否 | 2 | GitHub搜索关键词最大使用数量（建议：2-5） |
-| `GH_MAX_REPOS` | 否 | 100 | GitHub搜索仓库总数量限制（建议：50-200） |
-| `GH_PER_PAGE` | 否 | 30 | GitHub搜索每页返回的仓库数量（最大100） |
-| `GH_SLEEP_INTERVAL` | 否 | 2 | GitHub API请求间隔时间（秒） |
-| `GH_REQUEST_TIMEOUT` | 否 | 10 | GitHub API请求超时时间（秒） |
+| `GH_MAX_REPOS` | 否 | 100 | GitHub搜索仓库总数量限制（建议：50-200，仅在GitHub Actions中使用） |
+| `GH_PER_PAGE` | 否 | 30 | GitHub搜索每页返回的仓库数量（最大100，仅在GitHub Actions中使用） |
 
 ### 平台搜索相关配置
 
 | 变量名 | 必需 | 默认值 | 说明 |
 |--------|------|--------|------|
-| `HUNTER_API_KEY` | 否 | 无 | Hunter平台API密钥 |
-| `QUAKE_API_KEY` | 否 | 无 | Quake平台API密钥 |
-| `MAX_PLATFORM_KW` | 否 | 25 | 平台搜索关键词最大数量 |
+| `HUNTER_API_KEY` | 否 | 无 | Hunter平台API密钥（鹊桥平台：hunter.qianxin.com） |
+| `QUAKE_API_KEY` | 否 | 无 | Quake平台API密钥（360 Quake平台：quake.360.net） |
+| `MAX_PLATFORM_KW` | 否 | 25 | 平台搜索关键词最大数量（建议：15-30） |
 
 ### 运行控制
 
@@ -128,15 +147,15 @@ python -m src.main
 |--------|------|--------|------|
 | `RUN_GITHUB` | 否 | 1 | 是否运行GitHub收集模块（1启用，0禁用） |
 | `RUN_PLATFORMS` | 否 | 1 | 是否运行平台搜索模块（1启用，0禁用） |
-| `MAX_WORKERS` | 否 | 8 | 并发处理的最大线程数 |
+| `MAX_WORKERS` | 否 | 8 | 并发处理的最大线程数（建议：4-16） |
 
-### 其他配置
+### 导出配置
 
 | 变量名 | 必需 | 默认值 | 说明 |
 |--------|------|--------|------|
-| `DB_PATH` | 否 | data/nodes.db | 数据库文件路径 |
-| `EXPORT_PATH` | 否 | data/sub.txt | 导出文件路径 |
-| `EXPORT_BASE64_PATH` | 否 | data/sub_base64.txt | Base64编码导出文件路径 |
+| `DB_PATH` | 否 | data/nodes.db | SQLite数据库文件路径 |
+| `EXPORT_PATH` | 否 | data/sub.txt | 合并订阅文件导出路径 |
+| `EXPORT_BASE64_PATH` | 否 | data/sub_base64.txt | Base64编码订阅文件导出路径 |
 
 ## 搜索原理详解
 

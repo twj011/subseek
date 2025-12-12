@@ -18,12 +18,12 @@ class HunterSearcher:
         self.api_key = api_key or HUNTER_API_KEY  # 设置API密钥，如果未提供则使用默认值
         self.base_url = "https://hunter.qianxin.com/openApi/search"  # 设置API的基础URL
 
-    def search(self, query, page_size=20):
+    def search(self, query, page_size=100):
         """
         在Hunter平台上执行搜索
-        
+
         :param query: 搜索查询语句
-        :param page_size: 每页返回的结果数量，默认为20
+        :param page_size: 每页返回的结果数量，默认为100（API限制内的最大值）
         :return: 包含搜索结果URL的列表
         """
         if not self.api_key:
@@ -61,12 +61,12 @@ class QuakeSearcher:
         self.api_key = api_key or QUAKE_API_KEY  # 设置API密钥
         self.base_url = "https://quake.360.net/api/v3/search/quake_service"  # 设置API基础URL
 
-    def search(self, query, size=20):
+    def search(self, query, size=100):
         """
         在Quake平台上执行搜索
-        
+
         :param query: 搜索查询语句
-        :param size: 返回结果的数量，默认为20
+        :param size: 返回结果的数量，默认为100（API限制内的最大值）
         :return: 包含搜索结果URL的列表
         """
         if not self.api_key:
@@ -89,11 +89,11 @@ class QuakeSearcher:
             return []
 
 class DDGSearcher:
-    def search(self, query, max_results=20):
+    def search(self, query, max_results=50):
         """
         使用DuckDuckGo搜索引擎进行搜索的方法
         :param query: 搜索关键词，用于指定搜索的内容
-        :param max_results: 最大搜索结果数量，默认为20个结果
+        :param max_results: 最大搜索结果数量，默认为50个结果（在合理范围内增加结果数）
         :return: 搜索结果列表
         """
         try:

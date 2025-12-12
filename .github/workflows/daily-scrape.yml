@@ -58,10 +58,15 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Add all subscription files including date-stamped archives
           git add data/sub_github.txt data/sub_github_base64.txt || true
+          git add data/sub_platform.txt data/sub_platform_base64.txt || true
+          git add data/sub.txt data/sub_base64.txt || true
+          git add data/github/ data/platform/ || true
+          git add "data/[0-9][0-9][0-9][0-9]/" || true
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
-          git commit -m "chore: update subscriptions [skip ci]"
+          git commit -m "chore: update platform subscriptions [skip ci]"
           git push
