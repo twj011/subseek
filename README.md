@@ -34,11 +34,17 @@ SubSeek 的工作流程分为以下几个主要步骤：
 4. **节点验证**：测试节点的连通性，只保存可用的节点
 5. **导出订阅**：将收集的节点导出为订阅文件
 
+---
+
 ## 安装与使用
 
-### GitHub Actions 自动运行（推荐）
+### 一：GitHub Actions 自动运行
+> 注意GitHub Actions 最大运行时长为6个小时
 
-项目已配置 GitHub Actions 每日自动运行。配置步骤：
+> 项目已配置 GitHub Actions 每日自动运行。
+
+
+**配置步骤：**
 
 #### 1. 配置 Secrets（必需）
 进入仓库 **Settings > Secrets and variables > Actions > Secrets**，点击 **New repository secret** 添加：
@@ -64,7 +70,9 @@ SubSeek 的工作流程分为以下几个主要步骤：
 
 **注意**：不配置 Variables 时，将使用默认值。
 
-### 使用Docker（本地运行）
+---
+
+### 二：使用Docker
 
 1. 复制环境变量配置文件：
 ```bash
@@ -81,24 +89,7 @@ nano .env
 docker-compose up -d
 ```
 
-### 本地运行
-
-1. 安装依赖：
-```bash
-pip install -r requirements.txt
-```
-
-2. 设置环境变量：
-```bash
-export GH_TOKEN="your_github_token"
-export HUNTER_API_KEY="your_hunter_api_key"
-export QUAKE_API_KEY="your_quake_api_key"
-```
-
-3. 运行程序：
-```bash
-python -m src.main
-```
+---
 
 ## 环境变量详解
 
