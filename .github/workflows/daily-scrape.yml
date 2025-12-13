@@ -6,6 +6,10 @@ on:
     - cron: "0 0 * * *"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -69,4 +73,5 @@ jobs:
             exit 0
           fi
           git commit -m "chore: update platform subscriptions [skip ci]"
+          git pull --rebase origin master
           git push
